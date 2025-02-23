@@ -87,7 +87,7 @@ const server = http.createServer((req, res) => {
             filePath = "/home.html";
         } else if (path === "/prescription_request" || path === "/login"
             || path === "/patient_list" || path === "/admin_dashboard" || path === "/register"
-            || path === "/patient_profile" || path === "/report" || path ==="/addPatient") {
+            || path === "/patient_profile" || path === "/report" || path ==="/addPatient" || path=== "/enterPrescription") {
             filePath = "/index.html";
         }
 

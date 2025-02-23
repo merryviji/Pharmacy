@@ -53,16 +53,5 @@
     "emailAddress": "anna.neha@gmail.com",
     "phoneNumber": "5588996633",
     "address": "18 Simcoe St"
-  },
-  {
-    "id": "006",
-    "firstName": "MERRY",
-    "lastName": "VIJI",
-    "gender": "Female",
-    "age": 21,
-    "healthCardNumber": "1231223",
-    "emailAddress": "merryviji2k03@gmail.com",
-    "phoneNumber": "2896714412",
-    "address": "1146 Hortop Street"
   }
 ]

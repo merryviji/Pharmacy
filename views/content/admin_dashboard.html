@@ -1,7 +1,7 @@
 <main class="container mt-5">
     <div class="row justify-content-between mt-5 mb-5">
         <div class="col-lg-4 d-grid">
-            <button class="btn btn-success btn-lg py-5">Enter Prescription</button>
+            <button id="enterPrescription" class="btn btn-success btn-lg py-5">Enter Prescription</button>
         </div>
         <div class="col-lg-4 d-grid">
             <button id="addPatientBtn" class="btn btn-success btn-lg py-5">Add Patient</button>
@@ -30,4 +30,10 @@
         window.location.href = "addPatient";
     }
     addPatientBtn.addEventListener("click", addPatient);
+
+    const enterPresBtn=document.getElementById("#enterPrescription")
+    function enterPres(){
+        window.location.href="enterPrescription"
+    }
+    enterPresBtn.addEventListener("click",enterPres );
 </script>

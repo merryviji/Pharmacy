@@ -90,7 +90,8 @@ router.AddTable([
     "/register",
     "/patient_profile",
     "/report",
-    "/addPatient"
+    "/addPatient",
+    "/enterPrescription"
 ]);
 
 

@@ -55,7 +55,8 @@ router.AddTable([
     "/register",
     "/patient_profile",
     "/report",
-    "/addPatient"
+    "/addPatient",
+    "/enterPrescription"
 ]);
 let route = location.pathname;
 router.ActiveLink = (router.Find(route) > -1) ? ((route === "/") ? "home" : route.substring(1)) : ("404");

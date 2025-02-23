@@ -292,7 +292,70 @@
         });
 
     }
-
+    // function DisplayAddPatientPage() {
+    //     console.log("Called DisplayAddPatientPage()");
+    //     document.getElementById('patientForm')?.addEventListener('submit', async function (event: Event) {
+    //         event.preventDefault(); // Prevent the default form submission
+    //
+    //         // Gather form data safely
+    //         const getInputValue = (id: string): string | null => {
+    //             const element = document.getElementById(id) as HTMLInputElement | null;
+    //             return element ? element.value.trim() : null;
+    //         };
+    //
+    //         const firstName = getInputValue('AddPatientFirstname');
+    //         const lastName = getInputValue('AddPatientLastname');
+    //         const emailAddress = getInputValue('AddEmailAddress');
+    //         const address = getInputValue('AddAddress');
+    //         const contactNumber = getInputValue('AddPhoneNumber');
+    //         const gender = getInputValue('AddGender');
+    //         const age = getInputValue('AddDateOfBirth');
+    //         const healthCardNumber = getInputValue('AddHealthCardNumber');
+    //
+    //         // Check if any field is missing
+    //         if (!firstName || !lastName || !emailAddress || !address || !contactNumber || !gender || !age || !healthCardNumber) {
+    //             alert('One or more form fields are missing!');
+    //             return;
+    //         }
+    //
+    //         // Validate passwords match
+    //
+    //
+    //         const formData = {
+    //             firstName,
+    //             lastName,
+    //             emailAddress,
+    //             address,
+    //             contactNumber,
+    //             gender,
+    //             age,
+    //             healthCardNumber
+    //         };
+    //
+    //         // Send the data to the server
+    //         try {
+    //             const response = await fetch('/addPatient', {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify(formData)
+    //             });
+    //
+    //             const result = await response.json();
+    //             if (response.ok) {
+    //                 alert('Creation successful!');
+    //
+    //             } else {
+    //                 alert('Registration failed');
+    //             }
+    //         } catch (error) {
+    //             console.error('Error:', error);
+    //             alert('An error occurred during registration.');
+    //         }
+    //     });
+    //
+    // }
 
 
 
@@ -330,6 +393,7 @@
             case "login": return DisplayLoginPage;
             case "patient_list": return DisplayPatientListPage;
             case "register": return DisplayRegisterPage;
+            // case "addPatient": return DisplayAddPatientPage;
             // case "patient_profile": return DisplayPatientProfilePage;
             case "prescription_request": return DisplayPrescriptionRequestPage;
             case "404": return Display404Page;

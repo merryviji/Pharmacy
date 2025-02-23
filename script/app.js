@@ -210,6 +210,58 @@
             }
         });
     }
+    function DisplayAddPatientPage() {
+        console.log("Called DisplayAddPatientPage()");
+        document.getElementById('patientForm')?.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const getInputValue = (id) => {
+                const element = document.getElementById(id);
+                return element ? element.value.trim() : null;
+            };
+            const firstName = getInputValue('AddPatientFirstname');
+            const lastName = getInputValue('AddPatientLastname');
+            const emailAddress = getInputValue('AddEmailAddress');
+            const address = getInputValue('AddAddress');
+            const contactNumber = getInputValue('AddPhoneNumber');
+            const gender = getInputValue('AddGender');
+            const age = getInputValue('AddDateOfBirth');
+            const healthCardNumber = getInputValue('AddHealthCardNumber');
+            if (!firstName || !lastName || !emailAddress || !address || !contactNumber || !gender || !age || !healthCardNumber) {
+                alert('One or more form fields are missing!');
+                return;
+            }
+            const formData = {
+                firstName,
+                lastName,
+                emailAddress,
+                address,
+                contactNumber,
+                gender,
+                age,
+                healthCardNumber
+            };
+            try {
+                const response = await fetch('/addPatient', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert('Creation successful!');
+                }
+                else {
+                    alert('Registration failed');
+                }
+            }
+            catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during registration.');
+            }
+        });
+    }
     function Display404Page() {
         console.log("Display404Page() Called..");
     }
@@ -235,6 +287,7 @@
             case "login": return DisplayLoginPage;
             case "patient_list": return DisplayPatientListPage;
             case "register": return DisplayRegisterPage;
+            case "addPatient": return DisplayAddPatientPage;
             case "prescription_request": return DisplayPrescriptionRequestPage;
             case "404": return Display404Page;
             default:

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "001",
+    "firstName": "Merry",
+    "lastName": "Viji",
+    "gender": "Female",
+    "age": 21,
+    "healthCardNumber": 123456789,
+    "emailAddress": "merryviji@gmail.com",
+    "phoneNumber": 2896714412,
+    "address": "11 Simcoe Street "
+  },
+  {
+    "id": "002",
+    "firstName": "Meng",
+    "lastName": "Cai",
+    "gender": "Female",
+    "age": 21,
+    "healthCardNumber": 123456789,
+    "emailAddress": "mengcai@gmail.com",
+    "phoneNumber": 2896714412,
+    "address": "12 Simcoe Street "
+  },
+  {
+    "id": "003",
+    "firstName": "Bency",
+    "lastName": "Daniel Binu",
+    "gender": "Male",
+    "age": 21,
+    "healthCardNumber": 123456789,
+    "emailAddress": "bencybinu@gmail.com",
+    "phoneNumber": 2896714412,
+    "address": "13 Simcoe Street "
+  },
+  {
+    "id": "004",
+    "firstName": "Jubin",
+    "lastName": "Boban",
+    "gender": "Male",
+    "age": 21,
+    "healthCardNumber": 123456789,
+    "emailAddress": "jubinboban@gmail.com",
+    "phoneNumber": 2896714412,
+    "address": "14 Simcoe Street "
+  },
+  {
+    "id": "005",
+    "firstName": "Anna",
+    "lastName": "Soloman",
+    "gender": "Female",
+    "age": 20,
+    "healthCardNumber": "25361458",
+    "emailAddress": "anna.neha@gmail.com",
+    "phoneNumber": "5588996633",
+    "address": "18 Simcoe St"
+  },
+  {
+    "id": "006",
+    "firstName": "MERRY",
+    "lastName": "VIJI",
+    "gender": "Female",
+    "age": 21,
+    "healthCardNumber": "1231223",
+    "emailAddress": "merryviji2k03@gmail.com",
+    "phoneNumber": "2896714412",
+    "address": "1146 Hortop Street"
+  }
+]

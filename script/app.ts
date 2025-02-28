@@ -576,12 +576,124 @@ interface PatientPrescription {
 
 
 
-
-
-
     function Display404Page(){
         console.log("Display404Page() Called..");
     }
+
+
+
+
+    function DisplayRequestProcessPage(): void {
+        console.log("DisplayRefillRequests is running...");
+
+        fetch("/data/patientRx.json")
+            .then(response => {
+                console.log("Fetching patientRx.json...");
+                if (!response.ok) throw new Error("Failed to load patientRx.json");
+                return response.json();
+            })
+            .then(patientData => {
+                console.log("Loaded patientRx.json:", patientData);
+
+                fetch("/data/patient.json") // Fetch patient details
+                    .then(response => {
+                        console.log("Fetching patient.json...");
+                        if (!response.ok) throw new Error("Failed to load patient.json");
+                        return response.json();
+                    })
+                    .then(patients => {
+                        console.log("Loaded patient.json:", patients);
+
+                        const tableBody = document.getElementById("requestProcess") as HTMLTableSectionElement;
+                        if (!tableBody) {
+                            console.error("Table body not found in the document.");
+                            return;
+                        }
+
+                        let refillRequests: any[] = [];
+
+                        patientData.forEach((patient: any) => {
+                            console.log(`Checking patient ${patient.patientId}`);
+                            patient.prescriptions.forEach((prescription: any) => {
+                                if (prescription.requestStatus === "Pending") {
+                                    console.log(`Pending request found for ${prescription.rxNum}`);
+
+                                    const patientDetails = patients.find((p: any) => p.id === patient.patientId);
+                                    const patientName = patientDetails ? `${patientDetails.firstName} ${patientDetails.lastName}` : "Unknown";
+
+                                    refillRequests.push({
+                                        patientId: patient.patientId,
+                                        patientName: patientName,
+                                        rxNum: prescription.rxNum,
+                                        medication: prescription.medications.map((med: any) => med.name).join(", "),
+                                        status: prescription.status
+                                    });
+                                }
+                            });
+                        });
+
+                        console.log("Refill Requests Found:", refillRequests);
+
+                        if (refillRequests.length === 0) {
+                            console.warn("No pending refill requests found.");
+                            return;
+                        }
+
+                        tableBody.innerHTML = refillRequests.map((request, index) => `
+                        <tr>
+                            <td>${request.patientId}</td>
+                            <td>${request.patientName}</td>
+                            <td>${request.rxNum}</td>
+                            <td>${request.medication}</td>
+                            <td>${request.status}</td>
+                            <td>
+                                <button class="btn btn-primary approve-btn" data-index="${index}">
+                                    Approve
+                                </button>
+                            </td>
+                        </tr>
+                    `).join("");
+
+                        document.querySelectorAll(".approve-btn").forEach(button => {
+                            button.addEventListener("click", function (event) {
+                                const targetButton = event.currentTarget as HTMLButtonElement;
+                                const index: number = parseInt(targetButton.dataset.index!);
+
+                                handleApproval(refillRequests[index]);
+                            });
+                        });
+
+                        console.log("Table populated successfully.");
+
+                    })
+                    .catch(error => console.error("Error fetching patient details:", error));
+            })
+            .catch(error => console.error("Error fetching prescription data:", error));
+    }
+
+
+// Handle refill approval
+    function handleApproval(request: any): void {
+        fetch("/update-prescription-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                patientId: request.patientId,
+                rxNum: request.rxNum,
+                newStatus: "Approved"
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("✅ Request approved:", data);
+                alert(`Refill request for ${request.rxNum} approved!`);
+                location.reload(); // Refresh to update the table
+            })
+            .catch(error => console.error("❌ Error approving request:", error));
+    }
+
+
+
 
 
 
@@ -614,6 +726,7 @@ interface PatientPrescription {
             // case "addPatient": return DisplayAddPatientPage;
             case "patient_dashboard": return DisplayPatientDashboardPage;
             case "prescription_request": return DisplayPrescriptionRequestPage;
+            case "request_process": return DisplayRequestProcessPage;
             case "404": return Display404Page;
             default:
                 console.error("ERROR: Callback doesn't exist for ActiveLink - " + router.ActiveLink);

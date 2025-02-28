@@ -23,6 +23,7 @@ interface Prescription {
     doctor: string;
     status: string;
     endDate: string;
+    requestStatus: string;
     medications: Medication[];
     action: string;
 }
@@ -128,7 +129,7 @@ const server = http.createServer((req, res) => {
                     patients.forEach((patient: Patient) => {
                         patient.prescriptions.forEach((prescription: Prescription) => {
                             if (prescription.rxNum === rxNum) {
-                                prescription.status = newStatus;
+                                prescription.requestStatus = newStatus;
                                 updated = true;
                             }
                         });
@@ -163,7 +164,8 @@ const server = http.createServer((req, res) => {
             filePath = "/home.html";
         } else if (path === "/prescription_request" || path === "/login"
             || path === "/patient_list" || path === "/admin_dashboard" || path === "/register"
-            || path === "/patient_profile" || path === "/patient_dashboard" || path ==="/addPatient" || path=== "/enterPrescription") {
+            || path === "/patient_profile" || path === "/patient_dashboard" || path ==="/addPatient"
+            || path=== "/enterPrescription" || path === "/request_process") {
             filePath = "/index.html";
         }
 

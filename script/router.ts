@@ -91,7 +91,8 @@ router.AddTable([
     "/patient_profile",
     "/patient_dashboard",
     "/addPatient",
-    "/enterPrescription"
+    "/enterPrescription",
+    "/request_process"
 ]);
 
 

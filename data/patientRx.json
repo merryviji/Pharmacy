@@ -6,9 +6,9 @@
         "rxNum": "RX12345",
         "date": "2025-02-10",
         "doctor": "Dr. Smith",
-        "status": "Pending",
+        "status": "Active",
         "endDate": "2025-03-10",
-        "requestStatus": "None",
+        "requestStatus": "Approved",
         "medications": [
           {
             "name": "Amoxicillin",
@@ -62,7 +62,7 @@
         "doctor": "Dr. Lee",
         "status": "Active",
         "endDate": "2025-03-05",
-        "requestStatus": "None",
+        "requestStatus": "Pending",
         "medications": [
           {
             "name": "Metformin",

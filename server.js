@@ -79,7 +79,7 @@ const server = http_1.default.createServer((req, res) => {
                     patients.forEach((patient) => {
                         patient.prescriptions.forEach((prescription) => {
                             if (prescription.rxNum === rxNum) {
-                                prescription.status = newStatus;
+                                prescription.requestStatus = newStatus;
                                 updated = true;
                             }
                         });
@@ -108,7 +108,8 @@ const server = http_1.default.createServer((req, res) => {
         }
         else if (path === "/prescription_request" || path === "/login"
             || path === "/patient_list" || path === "/admin_dashboard" || path === "/register"
-            || path === "/patient_profile" || path === "/patient_dashboard" || path === "/addPatient" || path === "/enterPrescription") {
+            || path === "/patient_profile" || path === "/patient_dashboard" || path === "/addPatient"
+            || path === "/enterPrescription" || path === "/request_process") {
             filePath = "/index.html";
         }
         let mime_type = lookup(filePath.substring(1));

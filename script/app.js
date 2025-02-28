@@ -104,8 +104,89 @@
     function DisplayAdminDashboardPage() {
         console.log("Called DisplayPatientListPage()");
     }
-    function DisplayPrescriptionRequestPage() {
-        console.log("Called DisplayPrescriptionRequestPage()");
+    const DisplayPrescriptionRequestPage = () => {
+        console.log("DisplayPrescriptionRequestPage is running...");
+        const userSession = sessionStorage.getItem("user");
+        if (!userSession) {
+            alert("You need to log in first.");
+            window.location.href = "/login";
+            return;
+        }
+        const user = JSON.parse(userSession);
+        const patientId = user.id;
+        fetch("/data/patientRx.json")
+            .then(response => {
+            if (!response.ok)
+                throw new Error("Error loading prescription data");
+            return response.json();
+        })
+            .then(data => {
+            const userPrescriptions = data.find((p) => p.patientId === patientId);
+            if (!userPrescriptions) {
+                console.warn("No prescriptions found for patient ID:", patientId);
+                return;
+            }
+            console.log("Prescription Data Loaded:", userPrescriptions);
+            const tableBody = document.getElementById("rxRequest");
+            if (!tableBody) {
+                console.error("Table body not found in the document.");
+                return;
+            }
+            tableBody.innerHTML = userPrescriptions.prescriptions.map((prescription, index) => {
+                const isDisabled = prescription.status !== "Active" || prescription.requestStatus === "Pending";
+                const buttonText = prescription.requestStatus === "Pending" ? "Pending" : "Request Refill";
+                return `
+                    <tr>
+                        <td>${prescription.date}</td>
+                        <td>${prescription.rxNum}</td>
+                        <td>${prescription.medications.map((med) => med.name).join(", ")}</td>
+                        <td>${prescription.medications[0].qty}</td>
+                        <td>${prescription.medications[0].days}</td>
+                        <td>${prescription.medications[0].remaining}</td>
+                        <td>${prescription.medications[0].auth}</td>
+                        <td>${prescription.status}</td>
+                        <td>
+                            <button class="btn btn-success refill-btn" data-index="${index}" ${isDisabled ? "disabled" : ""}>
+                                ${buttonText}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+            document.querySelectorAll(".refill-btn").forEach((button) => {
+                button.addEventListener("click", function (event) {
+                    const targetButton = event.currentTarget;
+                    handleRefillRequest(userPrescriptions, targetButton);
+                });
+            });
+        })
+            .catch(error => console.error("Error fetching prescription data:", error));
+    };
+    function handleRefillRequest(userPrescriptions, button) {
+        const index = parseInt(button.dataset.index || "-1");
+        const prescription = userPrescriptions.prescriptions[index];
+        prescription.requestStatus = "Pending";
+        button.textContent = "Pending";
+        button.disabled = true;
+        fetch("/update-prescription-status", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                patientId: userPrescriptions.patientId,
+                rxNum: prescription.rxNum,
+                newStatus: "Pending",
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+            console.log("Prescription status updated:", data);
+        })
+            .catch(error => {
+            console.error("Error updating prescription status:", error);
+        });
+        console.log("Refill request sent for:", prescription.rxNum);
     }
     function DisplayLoginPage() {
         console.log("Called DisplayLoginPage()");
@@ -113,7 +194,7 @@
         messageArea.hide();
         $("#loginButton").on("click", function () {
             let success = false;
-            let newUser = new core.User();
+            let loggedInUser = null;
             let redirectURL = "";
             $.get("./data/users.json", function (data) {
                 let username = document.forms[0].username.value;
@@ -121,18 +202,22 @@
                 for (const user of data.users) {
                     if (username === user.Username && password === user.Password) {
                         success = true;
-                        newUser.fromJSON(user);
+                        loggedInUser = {
+                            id: user.id,
+                            username: user.Username,
+                            role: user.Role
+                        };
                         if (user.Role === "Admin") {
                             redirectURL = "/admin_dashboard";
                         }
                         else if (user.Role === "Patient") {
-                            redirectURL = "/patient_list";
+                            redirectURL = "/patient_dashboard";
                         }
                         break;
                     }
                 }
                 if (success) {
-                    sessionStorage.setItem("user", newUser.serialize());
+                    sessionStorage.setItem("user", JSON.stringify(loggedInUser));
                     messageArea.removeAttr("class").hide();
                     location.href = redirectURL;
                 }
@@ -210,56 +295,68 @@
             }
         });
     }
-    function DisplayAddPatientPage() {
-        console.log("Called DisplayAddPatientPage()");
-        document.getElementById('patientForm')?.addEventListener('submit', async function (event) {
-            event.preventDefault();
-            const getInputValue = (id) => {
-                const element = document.getElementById(id);
-                return element ? element.value.trim() : null;
-            };
-            const firstName = getInputValue('AddPatientFirstname');
-            const lastName = getInputValue('AddPatientLastname');
-            const emailAddress = getInputValue('AddEmailAddress');
-            const address = getInputValue('AddAddress');
-            const contactNumber = getInputValue('AddPhoneNumber');
-            const gender = getInputValue('AddGender');
-            const age = getInputValue('AddDateOfBirth');
-            const healthCardNumber = getInputValue('AddHealthCardNumber');
-            if (!firstName || !lastName || !emailAddress || !address || !contactNumber || !gender || !age || !healthCardNumber) {
-                alert('One or more form fields are missing!');
+    function DisplayPatientDashboardPage() {
+        console.log("DisplayPatientDashboardPage is running");
+        const userSession = sessionStorage.getItem("user");
+        if (!userSession) {
+            alert("You need to log in first.");
+            window.location.href = "/login";
+            return;
+        }
+        const user = JSON.parse(userSession);
+        const patientId = user.id.trim();
+        fetch("/data/patientRx.json")
+            .then(response => response.json())
+            .then(data => {
+            const userPrescriptions = data.find((p) => p.patientId.trim() === patientId);
+            const tableBody = document.getElementById("prescriptionTableBody");
+            if (!tableBody) {
+                console.error("Table body not found.");
                 return;
             }
-            const formData = {
-                firstName,
-                lastName,
-                emailAddress,
-                address,
-                contactNumber,
-                gender,
-                age,
-                healthCardNumber
-            };
-            try {
-                const response = await fetch('/addPatient', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
+            if (userPrescriptions && userPrescriptions.prescriptions.length > 0) {
+                tableBody.innerHTML = "";
+                userPrescriptions.prescriptions.forEach((prescription, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${prescription.date}</td>
+                        <td><a href="#" class="rx-link" data-index="${index}">${prescription.rxNum}</a></td>
+                        <td>${prescription.medications.map((med) => med.name).join(", ")}</td>
+                        <td>${prescription.status}</td>
+                    `;
+                    tableBody.appendChild(row);
                 });
-                const result = await response.json();
-                if (response.ok) {
-                    alert('Creation successful!');
-                }
-                else {
-                    alert('Registration failed');
-                }
+                updatePrescriptionDetails(userPrescriptions.prescriptions[0]);
+                document.querySelectorAll(".rx-link").forEach(link => {
+                    link.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        const target = event.target;
+                        const index = parseInt(target.dataset.index);
+                        updatePrescriptionDetails(userPrescriptions.prescriptions[index]);
+                    });
+                });
             }
-            catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred during registration.');
+            else {
+                tableBody.innerHTML = `<tr><td colspan="4">No prescriptions found.</td></tr>`;
             }
+        })
+            .catch(error => console.error("Error fetching prescription data:", error));
+    }
+    function updatePrescriptionDetails(prescription) {
+        document.getElementById("detailRxNumber").textContent = prescription.rxNum;
+        document.getElementById("detailDoctor").textContent = prescription.doctor;
+        document.getElementById("detailIssued").textContent = prescription.date;
+        document.getElementById("detailEnd").textContent = prescription.endDate;
+        const detailBody = document.getElementById("prescriptionDetailTBody");
+        detailBody.innerHTML = "";
+        prescription.medications.forEach((med) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${med.name}</td>
+            <td>${med.dosage}</td>
+            <td>${med.notes || "No notes"}</td>
+        `;
+            detailBody.appendChild(row);
         });
     }
     function Display404Page() {
@@ -287,7 +384,7 @@
             case "login": return DisplayLoginPage;
             case "patient_list": return DisplayPatientListPage;
             case "register": return DisplayRegisterPage;
-            case "addPatient": return DisplayAddPatientPage;
+            case "patient_dashboard": return DisplayPatientDashboardPage;
             case "prescription_request": return DisplayPrescriptionRequestPage;
             case "404": return Display404Page;
             default:

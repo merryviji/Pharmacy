@@ -66,6 +66,41 @@ const server = http_1.default.createServer((req, res) => {
             }
         });
     }
+    if (path === "/update-prescription-status" && req.method === "POST") {
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        });
+        req.on('end', () => {
+            try {
+                const { rxNum, newStatus } = JSON.parse(body);
+                readJSONFile(__dirname + '/data/patientRx.json', (patients) => {
+                    let updated = false;
+                    patients.forEach((patient) => {
+                        patient.prescriptions.forEach((prescription) => {
+                            if (prescription.rxNum === rxNum) {
+                                prescription.status = newStatus;
+                                updated = true;
+                            }
+                        });
+                    });
+                    if (!updated) {
+                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ message: "Prescription not found" }));
+                        return;
+                    }
+                    writeJSONFile(__dirname + '/data/patientRx.json', patients, () => {
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ message: "Prescription status updated!" }));
+                    });
+                });
+            }
+            catch (error) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Invalid data format" }));
+            }
+        });
+    }
     else {
         let filePath = path;
         if (path === "/" || path === "/home") {
@@ -73,7 +108,7 @@ const server = http_1.default.createServer((req, res) => {
         }
         else if (path === "/prescription_request" || path === "/login"
             || path === "/patient_list" || path === "/admin_dashboard" || path === "/register"
-            || path === "/patient_profile" || path === "/report" || path === "/addPatient" || path === "/enterPrescription") {
+            || path === "/patient_profile" || path === "/patient_dashboard" || path === "/addPatient" || path === "/enterPrescription") {
             filePath = "/index.html";
         }
         let mime_type = lookup(filePath.substring(1));

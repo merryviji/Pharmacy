@@ -1,5 +1,29 @@
 "use strict";
 
+interface Medication {
+    name: string;
+    dosage: string;
+    qty: number;
+    days: number;
+    remaining: number;
+    auth: string;
+    notes: string;
+}
+
+interface Prescription {
+    rxNum: string;
+    date: string;
+    doctor: string;
+    status: string;
+    endDate: string;
+    medications: Medication[];
+    action: string;
+}
+
+interface PatientPrescription {
+    patientId: string;
+    prescriptions: Prescription[];
+}
 
 
 (function (){
@@ -160,11 +184,112 @@
     }
 
 
+    const DisplayPrescriptionRequestPage = (): void => {
+        console.log("DisplayPrescriptionRequestPage is running...");
 
-    function DisplayPrescriptionRequestPage(): void {
-        console.log("Called DisplayPrescriptionRequestPage()");
+        const userSession = sessionStorage.getItem("user");
 
+        if (!userSession) {
+            alert("You need to log in first.");
+            window.location.href = "/login";
+            return;
+        }
+
+        const user = JSON.parse(userSession);
+        const patientId = user.id;
+
+        fetch("/data/patientRx.json")
+            .then(response => {
+                if (!response.ok) throw new Error("Error loading prescription data");
+                return response.json();
+            })
+            .then(data => {
+                const userPrescriptions = data.find((p: any) => p.patientId === patientId);
+
+                if (!userPrescriptions) {
+                    console.warn("No prescriptions found for patient ID:", patientId);
+                    return;
+                }
+
+                console.log("Prescription Data Loaded:", userPrescriptions);
+
+                // Get the table body
+                const tableBody = document.getElementById("rxRequest") as HTMLTableSectionElement;
+                if (!tableBody) {
+                    console.error("Table body not found in the document.");
+                    return;
+                }
+
+                // Populate table
+                tableBody.innerHTML = userPrescriptions.prescriptions.map((prescription: any, index: number) => {
+                    const isDisabled = prescription.status !== "Active" || prescription.requestStatus === "Pending";
+                    const buttonText = prescription.requestStatus === "Pending" ? "Pending" : "Request Refill";
+
+                    return `
+                    <tr>
+                        <td>${prescription.date}</td>
+                        <td>${prescription.rxNum}</td>
+                        <td>${prescription.medications.map((med: any) => med.name).join(", ")}</td>
+                        <td>${prescription.medications[0].qty}</td>
+                        <td>${prescription.medications[0].days}</td>
+                        <td>${prescription.medications[0].remaining}</td>
+                        <td>${prescription.medications[0].auth}</td>
+                        <td>${prescription.status}</td>
+                        <td>
+                            <button class="btn btn-success refill-btn" data-index="${index}" ${isDisabled ? "disabled" : ""}>
+                                ${buttonText}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                }).join("");
+
+                // Add event listeners for refill buttons
+                document.querySelectorAll(".refill-btn").forEach((button) => {
+                    button.addEventListener("click", function (event) {
+                        const targetButton = event.currentTarget as HTMLButtonElement; // Ensure correct typing
+                        handleRefillRequest(userPrescriptions, targetButton);
+                    });
+                });
+
+
+            })
+            .catch(error => console.error("Error fetching prescription data:", error));
     }
+
+    function handleRefillRequest(userPrescriptions: any, button: HTMLButtonElement) {
+        const index: number = parseInt(button.dataset.index || "-1");
+        const prescription = userPrescriptions.prescriptions[index];
+
+        // Update UI
+        prescription.requestStatus = "Pending";
+        button.textContent = "Pending";
+        button.disabled = true;
+
+        // Send update to backend
+        fetch("/update-prescription-status", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                patientId: userPrescriptions.patientId,
+                rxNum: prescription.rxNum,
+                newStatus: "Pending",
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Prescription status updated:", data);
+            })
+            .catch(error => {
+                console.error("Error updating prescription status:", error);
+            });
+
+        console.log("Refill request sent for:", prescription.rxNum);
+    }
+
+
 
 
 
@@ -177,7 +302,7 @@
 
         $("#loginButton").on("click", function () {
             let success = false;
-            let newUser = new core.User();
+            let loggedInUser: { id: string; username: string; role: string } | null = null;
             let redirectURL = ""; // This will store the redirection path
 
             $.get("./data/users.json", function (data) {
@@ -187,13 +312,17 @@
                 for (const user of data.users) {
                     if (username === user.Username && password === user.Password) {
                         success = true;
-                        newUser.fromJSON(user);
+                        loggedInUser = {
+                            id: user.id,
+                            username: user.Username,
+                            role: user.Role
+                        };
 
                         // Set redirection based on user role
                         if (user.Role === "Admin") {
                             redirectURL = "/admin_dashboard"; // Redirect Admin
                         } else if (user.Role === "Patient") {
-                            redirectURL = "/patient_list"; // Redirect Patient
+                            redirectURL = "/patient_dashboard"; // Redirect Patient
                         }
 
                         break;
@@ -201,7 +330,7 @@
                 }
 
                 if (success) {
-                    sessionStorage.setItem("user", newUser.serialize() as string);
+                    sessionStorage.setItem("user", JSON.stringify(loggedInUser));
                     messageArea.removeAttr("class").hide();
                     location.href = redirectURL; // Redirect user to the appropriate page
                 } else {
@@ -357,6 +486,95 @@
     //
     // }
 
+    function DisplayPatientDashboardPage() {
+        console.log("DisplayPatientDashboardPage is running");
+
+        const userSession = sessionStorage.getItem("user");
+        if (!userSession) {
+            alert("You need to log in first.");
+            window.location.href = "/login";
+            return;
+        }
+
+        const user = JSON.parse(userSession);
+        const patientId = user.id.trim();
+
+        fetch("/data/patientRx.json")
+            .then(response => response.json())
+            .then(data => {
+
+                const userPrescriptions = data.find(
+                    (p: { patientId: string }) => p.patientId.trim() === patientId
+                );
+
+
+                const tableBody = document.getElementById("prescriptionTableBody") as HTMLTableSectionElement | null;
+                if (!tableBody) {
+                    console.error("Table body not found.");
+                    return;
+                }
+
+                if (userPrescriptions && userPrescriptions.prescriptions.length > 0) {
+                    tableBody.innerHTML = ""; // Clear previous content
+
+                    userPrescriptions.prescriptions.forEach((prescription: any, index: number) => {
+
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                        <td>${prescription.date}</td>
+                        <td><a href="#" class="rx-link" data-index="${index}">${prescription.rxNum}</a></td>
+                        <td>${prescription.medications.map((med: any) => med.name).join(", ")}</td>
+                        <td>${prescription.status}</td>
+                    `;
+                        tableBody.appendChild(row);
+                    });
+
+                    // Show details of the FIRST prescription by default
+                    updatePrescriptionDetails(userPrescriptions.prescriptions[0]);
+
+                    // Attach Click Event to Rx Numbers
+                    document.querySelectorAll(".rx-link").forEach(link => {
+                        link.addEventListener("click", (event) => {
+                            event.preventDefault();
+                            const target = event.target as HTMLAnchorElement;
+                            const index = parseInt(target.dataset.index as string);
+                            updatePrescriptionDetails(userPrescriptions.prescriptions[index]);
+                        });
+                    });
+
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="4">No prescriptions found.</td></tr>`;
+                }
+            })
+            .catch(error => console.error("Error fetching prescription data:", error));
+    }
+
+    /**
+     * Update Prescription Details Section
+     */
+    function updatePrescriptionDetails(prescription: any) {
+
+        document.getElementById("detailRxNumber")!.textContent = prescription.rxNum;
+        document.getElementById("detailDoctor")!.textContent = prescription.doctor;
+        document.getElementById("detailIssued")!.textContent = prescription.date;
+        document.getElementById("detailEnd")!.textContent = prescription.endDate;
+
+        const detailBody = document.getElementById("prescriptionDetailTBody") as HTMLTableSectionElement;
+        detailBody.innerHTML = ""; // Clear existing data
+
+        prescription.medications.forEach((med: any) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${med.name}</td>
+            <td>${med.dosage}</td>
+            <td>${med.notes || "No notes"}</td>
+        `;
+            detailBody.appendChild(row);
+        });
+    }
+
+
+
 
 
 
@@ -394,7 +612,7 @@
             case "patient_list": return DisplayPatientListPage;
             case "register": return DisplayRegisterPage;
             // case "addPatient": return DisplayAddPatientPage;
-            // case "patient_profile": return DisplayPatientProfilePage;
+            case "patient_dashboard": return DisplayPatientDashboardPage;
             case "prescription_request": return DisplayPrescriptionRequestPage;
             case "404": return Display404Page;
             default:

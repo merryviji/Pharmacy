@@ -1,0 +1,181 @@
+[
+  {
+    "patientId": "001",
+    "prescriptions": [
+      {
+        "rxNum": "RX12345",
+        "date": "2025-02-10",
+        "doctor": "Dr. Smith",
+        "status": "Pending",
+        "endDate": "2025-03-10",
+        "requestStatus": "None",
+        "medications": [
+          {
+            "name": "Amoxicillin",
+            "dosage": "500mg",
+            "qty": 30,
+            "days": 10,
+            "remaining": 15,
+            "auth": "Yes",
+            "notes": "Take after meals."
+          },
+          {
+            "name": "Ibuprofen",
+            "dosage": "200mg",
+            "qty": 20,
+            "days": 5,
+            "remaining": 5,
+            "auth": "No",
+            "notes": "Take as needed for pain."
+          }
+        ],
+        "action": "Refill"
+      },
+      {
+        "rxNum": "RX12346",
+        "date": "2025-01-20",
+        "doctor": "Dr. Taylor",
+        "status": "Complete",
+        "endDate": "2025-02-20",
+        "requestStatus": "None",
+        "medications": [
+          {
+            "name": "Lisinopril",
+            "dosage": "10mg",
+            "qty": 90,
+            "days": 30,
+            "remaining": 0,
+            "auth": "No",
+            "notes": "Take in the morning."
+          }
+        ],
+        "action": "N/A"
+      }
+    ]
+  },
+  {
+    "patientId": "002",
+    "prescriptions": [
+      {
+        "rxNum": "RX98765",
+        "date": "2025-02-05",
+        "doctor": "Dr. Lee",
+        "status": "Active",
+        "endDate": "2025-03-05",
+        "requestStatus": "None",
+        "medications": [
+          {
+            "name": "Metformin",
+            "dosage": "500mg",
+            "qty": 60,
+            "days": 20,
+            "remaining": 30,
+            "auth": "Yes",
+            "notes": "Take with food."
+          }
+        ],
+        "action": "Refill"
+      }
+    ]
+  },
+  {
+    "patientId": "003",
+    "prescriptions": [
+      {
+        "rxNum": "RX56789",
+        "date": "2025-01-15",
+        "doctor": "Dr. Patel",
+        "status": "Active",
+        "endDate": "2025-02-15",
+        "requestStatus": "None",
+        "medications": [
+          {
+            "name": "Atorvastatin",
+            "dosage": "20mg",
+            "qty": 30,
+            "days": 30,
+            "remaining": 10,
+            "auth": "Yes",
+            "notes": "Take before bedtime."
+          }
+        ],
+        "action": "Refill"
+      }
+    ]
+  },
+  {
+    "patientId": "004",
+    "prescriptions": [
+      {
+        "rxNum": "RX22233",
+        "date": "2025-01-01",
+        "doctor": "Dr. Parker",
+        "status": "Active",
+        "endDate": "2025-02-15",
+        "requestStatus": "None",
+        "medications": [
+          {
+            "name": "Atorvastatin",
+            "dosage": "15mg",
+            "qty": 60,
+            "days": 30,
+            "remaining": 20,
+            "auth": "Yes",
+            "notes": "Take before bedtime."
+          }
+        ],
+        "action": "Refill"
+      }
+    ]
+  },
+  {
+    "patientId": "005",
+    "prescriptions": [
+      {
+        "rxNum": "RX38789",
+        "date": "2025-02-15",
+        "doctor": "Dr. Daniel",
+        "status": "Active",
+        "endDate": "2025-02-15",
+        "requestStatus": "None",
+        "medications": [
+          {
+            "name": "Atorvastatin",
+            "dosage": "20mg",
+            "qty": 30,
+            "days": 30,
+            "remaining": 10,
+            "auth": "Yes",
+            "notes": "Take before bedtime."
+          }
+        ],
+        "action": "Refill"
+      }
+    ]
+  },
+  {
+    "patientId": "006",
+    "prescriptions": [
+      {
+        "rxNum": "RX54009",
+        "date": "2025-01-15",
+        "doctor": "Dr. Sara",
+        "status": "Active",
+        "endDate": "2025-02-15",
+        "requestStatus": "None",
+        "medications": [
+          {
+            "name": "Atorvastatin",
+            "dosage": "20mg",
+            "qty": 30,
+            "days": 30,
+            "remaining": 10,
+            "auth": "Yes",
+            "notes": "Take before bedtime."
+          }
+        ],
+        "action": "Refill"
+      }
+    ]
+  }
+]

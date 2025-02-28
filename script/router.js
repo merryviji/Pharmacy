@@ -54,7 +54,7 @@ router.AddTable([
     "/patient_list",
     "/register",
     "/patient_profile",
-    "/report",
+    "/patient_dashboard",
     "/addPatient",
     "/enterPrescription"
 ]);
